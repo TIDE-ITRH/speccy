@@ -19,14 +19,55 @@ def bochner(acf, delta = 1, alias = True, bias = True):
 
     return ff, psd
 
-def inv_bochner(myfunc, params, n, delta = 1, alias = True):
+def inv_bochner(myfunc, params, n, delta = 1, alias = False, tol = 1e-6):
+
+    if alias:
+        S = alias_spectrum(myfunc, params, n, tol)
+    else:
+        ff1 = np.arange(1, n) / (2*n)
+        S_zero = myfunc(0, params)
+        S_ff = myfunc(ff1, params)
+        S_nyq = myfunc(0.5, params)
+        S = np.concatenate([[S_zero], S_ff, [S_nyq], S_ff[::-1]])
+
+    return np.real(np.fft.ifft(S))[:n]
+
+def alias_spectrum(myfunc, params, n, tol = 1e-6):
     
     ff1 = np.arange(1, n) / (2*n)
-
     S_zero = myfunc(0, params)
     S_ff = myfunc(ff1, params)
     S_nyq = myfunc(0.5, params)
-
     S = np.concatenate([[S_zero], S_ff, [S_nyq], S_ff[::-1]])
+    S_old = S.copy()
 
-    return np.real(np.fft.ifft(S))
+    i = 2
+    ff_fold = np.arange((i-1)*n+1, i*n) / (2*n)
+    S_zero = [myfunc(np.floor(i/2), params)]
+    S_nyq = [myfunc(np.floor((i-1)/2) + 0.5, params)]
+    S_nff = myfunc(ff_fold, params)
+    S_ff = S_nff[::-1]
+    S += np.concatenate([S_zero, S_ff, S_nyq, S_nff])
+
+    while np.mean(S - S_old) > tol: 
+        i += 1
+
+        S_old = S.copy()
+
+        ff_fold = np.arange((i-1)*n+1, i*n) / (2*n)
+
+        S_zero = [myfunc(np.floor(i/2), params)]
+        S_nyq = [myfunc(np.floor((i-1)/2) + 0.5, params)]
+
+        if ut.is_even(i):
+            S_nff = myfunc(ff_fold, params)
+            S_ff = S_nff[::-1]
+        else:
+            S_ff = myfunc(ff_fold, params)
+            S_nff = S_ff[::-1]
+
+        S += np.concatenate([S_zero, S_ff, S_nyq, S_nff])
+
+    print("Converged with " + str(i) + " iterations")
+
+    return S

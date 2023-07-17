@@ -21,7 +21,7 @@ def jonswap(f, params):
     S = alpha * (2*np.pi*f) ** (-r) * np.exp(-r/s * (f*Tp) ** (-s)) * gamma ** delta
     return(S)
 
-def matern_psd(ff, params):
+def matern(ff, params):
     """General Matern PSD a la Lilly/Sykulski"""
     
     eta = params[0]

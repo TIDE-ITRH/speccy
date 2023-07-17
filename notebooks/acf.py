@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import kv as K_nu
 from scipy.special import gamma
 
-def matern_acf(dx, params, sigma = 0, acf = True):
+def matern(dx, params, sigma = 0, acf = True):
     """General Matern covariance a la Lilly/Sykulski"""
 
     eta = params[0]
