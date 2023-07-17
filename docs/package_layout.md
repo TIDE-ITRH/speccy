@@ -12,8 +12,8 @@
 ### Low-level 
 
 - A bunch of ACF and PSD in closed form
-- function to go discrete ACF-->PSD (Bochner)
-- function to go discrete PSD-->ACF (inverse Bochner)
+- function to go discrete ACF-->PSD (Bochner) [done]
+- function to go discrete PSD-->ACF (inverse Bochner) [done]
 - periodogram our way (current thinking: always two-sided)
 - whittle likelihood return
-- function to compute bias spectrum from an ACF
+- function to compute bias spectrum from an ACF [done]
