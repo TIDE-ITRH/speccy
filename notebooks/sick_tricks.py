@@ -2,6 +2,40 @@
 import numpy as np
 import utils as ut
 
+def periodogram(ts, delta = 1, h = None):
+    
+    n = ts.size
+
+    if h is not None:
+        norm = np.sum(h**2)
+        scale = np.sqrt(n/norm)
+        ts = scale * h * ts
+
+    dft = np.fft.fft(ts)/np.sqrt(n/delta)
+    
+    I = np.fft.fftshift(np.real(dft * np.conj(dft)))
+    ff = np.fft.fftshift(np.fft.fftfreq(n, delta))
+
+    return ff, I
+
+def whittle(ts, specfunc, params, delta = 1, h = None):
+    
+    ff, I = periodogram(ts, delta, h)
+    S = specfunc(ff, params)
+
+    ll = - (np.log(S) + I/S)
+    idx = (ff != 0) * (ff != -0.5/delta)
+    
+    return np.sum(ll[idx])
+
+def dwhittle(ts, acffunc, params, delta = 1, h = None):
+    
+    tt = delta * np.arange(ts.size)
+    ff, I = periodogram(ts, delta, h)
+    ff_boch, S_boch = bochner(acffunc(tt, params), delta = delta, bias = True)
+    # HACK: quick fix cause bochner isn't two sided yet
+    return - 2 * np.sum(np.log(S_boch[ff_boch > 0]) + I[ff > 0]/S_boch[ff_boch > 0])
+
 def bochner(acf, delta = 1, bias = True, h = None):
 
     n = np.size(acf)
