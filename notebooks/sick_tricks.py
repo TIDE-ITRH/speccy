@@ -1,11 +1,18 @@
 import numpy as np
 import utils as ut
 
-def bochner(acf, delta = 1, alias = True, bias = True):
+def bochner(acf, delta = 1, bias = True, h = None):
 
     n = np.size(acf)
 
-    if bias:
+    if h is not None:
+        
+        norm = np.sum(h**2)
+        h_conv = (np.convolve(h, h, mode = 'full')/norm)[(n-1):]
+        acf = h_conv * acf
+
+    elif bias:
+
         acf = (1 - np.arange(n)/n) * acf
 
     ff = ut.calc_ff(n, delta)
@@ -30,7 +37,7 @@ def inv_bochner(myfunc, params, n, delta = 1, alias = False, tol = 1e-6):
         S_nyq = myfunc(0.5, params)
         S = np.concatenate([[S_zero], S_ff, [S_nyq], S_ff[::-1]])
 
-    return np.real(np.fft.ifft(S))[:n]
+    return np.arange(n)*delta, np.real(np.fft.ifft(S))[:n]
 
 def alias_spectrum(myfunc, params, n, tol = 1e-6):
     
