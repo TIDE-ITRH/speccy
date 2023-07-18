@@ -7,8 +7,11 @@ def is_even(x):
 def n_freq(n):
     return int(np.floor(n/2))
 
-def calc_ff(n, delta = 1, short = True):
-    if short:
-        return np.arange(n_freq(n)) / n / delta
-    else:
-        return np.arange(n) / n / delta
+def taus(n, delta):
+    return delta * np.arange(n)
+
+def fftshift(x):
+    return np.fft.fftshift(x)
+
+def fftfreq(n, delta):
+    return fftshift(np.fft.fftfreq(n, delta))

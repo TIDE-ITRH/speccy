@@ -13,10 +13,10 @@ def periodogram(ts, delta = 1, h = None):
 
     dft = np.fft.fft(ts)/np.sqrt(n/delta)
     
-    I = np.fft.fftshift(np.real(dft * np.conj(dft)))
-    ff = np.fft.fftshift(np.fft.fftfreq(n, delta))
+    I = np.real(dft * np.conj(dft))
+    ff = np.fft.fftfreq(n, delta)
 
-    return ff, I
+    return ut.fftshift(ff), ut.fftshift(I)
 
 def whittle(ts, specfunc, params, delta = 1, h = None):
     
@@ -50,43 +50,40 @@ def bochner(acf, delta = 1, bias = True, h = None):
 
         acf = (1 - np.arange(n)/n) * acf
 
-    ff = ut.calc_ff(n, delta)
+    ff = ut.fftfreq(n, delta)
 
     if ut.is_even(n):
         acf = np.concatenate([[acf[0]/2], acf[1:(n-1)], [acf[-1]/2]])
     else:
         acf = np.concatenate([[acf[0]/2], acf[1:n]])
     
-    psd = 2 * delta * np.real(np.fft.fft(acf))[:ut.n_freq(n)]
+    psd = 2 * delta * np.real(np.fft.fft(acf))
 
-    return ff, psd
+    return ff, ut.fftshift(psd)
 
 def inv_bochner(myfunc, params, n, delta = 1, alias = False, tol = 1e-6):
 
     if alias:
-        S = alias_spectrum(myfunc, params, n, tol)
+        S = alias_spectrum(myfunc, params, n, delta, tol)
     else:
-        ff1 = np.arange(1, n) / (2*n)
-        S_zero = myfunc(0, params)
-        S_ff = myfunc(ff1, params)
-        S_nyq = myfunc(0.5, params)
-        S = np.concatenate([[S_zero], S_ff, [S_nyq], S_ff[::-1]])
+        ff = ut.fftshift(ut.fftfreq(2*n, delta))
+        S = myfunc(ff, params)
 
-    return np.arange(n)*delta, np.real(np.fft.ifft(S))[:n]
+    acf = np.real(np.fft.ifft(S)) / delta
 
-def alias_spectrum(myfunc, params, n, tol = 1e-6):
+    return ut.taus(n, delta), acf[:n]
+
+def alias_spectrum(myfunc, params, n, delta, tol = 1e-6):
     
-    ff1 = np.arange(1, n) / (2*n)
-    S_zero = myfunc(0, params)
-    S_ff = myfunc(ff1, params)
-    S_nyq = myfunc(0.5, params)
-    S = np.concatenate([[S_zero], S_ff, [S_nyq], S_ff[::-1]])
+    ff = ut.fftshift(ut.fftfreq(2*n, delta))
+    S = myfunc(ff, params)
+
     S_old = S.copy()
 
     i = 2
-    ff_fold = np.arange((i-1)*n+1, i*n) / (2*n)
-    S_zero = [myfunc(np.floor(i/2), params)]
-    S_nyq = [myfunc(np.floor((i-1)/2) + 0.5, params)]
+    ff_fold = np.arange((i-1)*n+1, i*n) / (2*n) / delta
+    S_zero = [myfunc(np.floor(i/2)/delta, params)]
+    S_nyq = [myfunc((np.floor((i-1)/2) + 0.5)/delta, params)]
     S_nff = myfunc(ff_fold, params)
     S_ff = S_nff[::-1]
     S += np.concatenate([S_zero, S_ff, S_nyq, S_nff])
@@ -96,10 +93,10 @@ def alias_spectrum(myfunc, params, n, tol = 1e-6):
 
         S_old = S.copy()
 
-        ff_fold = np.arange((i-1)*n+1, i*n) / (2*n)
+        ff_fold = np.arange((i-1)*n+1, i*n) / (2*n) / delta
 
-        S_zero = [myfunc(np.floor(i/2), params)]
-        S_nyq = [myfunc(np.floor((i-1)/2) + 0.5, params)]
+        S_zero = [myfunc(np.floor(i/2)/delta, params)]
+        S_nyq = [myfunc((np.floor((i-1)/2) + 0.5)/delta, params)]
 
         if ut.is_even(i):
             S_nff = myfunc(ff_fold, params)
