@@ -1,8 +1,8 @@
 
 import numpy as np
 import scipy.linalg as linalg
-import utils as ut
-import sick_tricks as gary
+from . import utils as ut
+from . import sick_tricks as gary
 
 def mv_gaussian(acf):
     

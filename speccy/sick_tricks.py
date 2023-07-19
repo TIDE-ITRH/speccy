@@ -1,6 +1,6 @@
 
 import numpy as np
-import utils as ut
+from . import utils as ut
 
 def periodogram(ts, delta = 1, h = None):
     
