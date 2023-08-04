@@ -1,0 +1,8 @@
+data/*
+figures/*
+speccy/__pycache__/*.pyc
+notebooks/__pycache__/*.pyc
+speccy.egg-info/*
+speccy.egg-info/
+notebooks/*.nc
+notebooks/.ipynb_checkpoints/*
