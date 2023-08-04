@@ -1,9 +1,0 @@
-Metadata-Version: 2.1
-Name: speccy
-Version: 0.0.1
-Summary: Spectral analysis toolkit for data science
-Home-page: https://github.com/TIDE-ITRH/speccy
-Author: Lachlan Astfalck; Matt Rayson; Andrew Zulberti
-Author-email: lachlan.astfalck@uwa.edu.au
-License: MIT
-License-File: LICENSE
