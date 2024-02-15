@@ -60,13 +60,13 @@ def build_bases(l, k = None, h = None, delta = 1):
 
 def dwelch(ts, m, l, s, k = None, delta = 1, h = None, model = 'vanilla'):
 
-    _, pw = pwelch(ts, m, l, s)
+    _, pw = pwelch(ts, m, l, s, h=h)
     
     L = np.diag(1/pw)
     b = L @ pw
 
-    A = L @ build_bases(l, k, h, 1)
-    centres, _ = get_centres(l, k, delta)
+    A = L @ build_bases(l, k=k, h=h, delta=delta)
+    centres, _ = get_centres(l, k, delta=delta)
 
     if model == 'vanilla':
         dw = np.linalg.inv(A.T @ A) @ A.T @ b
