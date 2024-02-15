@@ -4,10 +4,7 @@ from scipy.special import gamma
 
 def jonswap(f, params):
     
-    alpha = params[0]
-    Tp = params[1]
-    gamma = params[2]
-    r = params[3]
+    alpha, Tp, gamma, r = params
     
     sig1 = 0.07
     sig2 = 0.09
@@ -34,3 +31,16 @@ def matern(ff, params):
     S *= np.power(np.power(2*np.pi*ff, 2) + np.power(lmbda, 2), -alpha)
     
     return S
+
+def ar(ff, params):
+    sd = params[0]
+    phis = params[1:]
+
+    d = np.repeat(1, ff.size)
+    d_conj = np.repeat(1, ff.size)
+
+    for i in np.arange(phis.size):
+        d = d - phis[i] * np.exp(-2j*(i+1)*np.pi*ff)
+        d_conj = d_conj - phis[i] * np.exp(2j*(i+1)*np.pi*ff)
+
+    return sd**2 / np.real(d * d_conj)

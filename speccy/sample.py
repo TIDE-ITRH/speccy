@@ -31,3 +31,14 @@ def random_amplitudes(specfunc, params, n, delta, alias=False, tol=1e-6):
         ts_sample += amp_sample[i] * np.cos(2*np.pi*f*t - phase_sample[i])
 
     return ts_sample
+
+def sample_ar(n, phis, sd = 1, burnin = 1000):
+    order = phis.size
+
+    x = np.empty(n+burnin)
+    x[0:order] = np.random.normal(0, sd, order)
+
+    for t in (np.arange(n+burnin-order) + order):
+        x[t] = x[(t-order):t] @ phis[::-1] + np.random.normal(0, sd)
+
+    return x[burnin:]

@@ -2,7 +2,7 @@
 import numpy as np
 from . import utils as ut
 
-def periodogram(ts, delta = 1, h = None):
+def periodogram(ts, delta=1, h=None, return_onesided=False):
     
     n = ts.size
 
@@ -14,11 +14,14 @@ def periodogram(ts, delta = 1, h = None):
     dft = np.fft.fft(ts)/np.sqrt(n/delta)
     
     I = np.real(dft * np.conj(dft))
-    ff = np.fft.fftfreq(n, delta)
+    ff = ut.fftfreq(n, delta)
 
-    return ut.fftshift(ff), ut.fftshift(I)
+    if return_onesided:
+        return ff[ff>=0], ut.fftshift(I)[ff>=0]
+    else:
+        return ff, ut.fftshift(I)
 
-def whittle(ts, specfunc, params, delta = 1, h = None):
+def whittle(ts, specfunc, params, delta=1, h=None):
     
     ff, I = periodogram(ts, delta, h)
     S = specfunc(ff, params)
@@ -28,7 +31,7 @@ def whittle(ts, specfunc, params, delta = 1, h = None):
     
     return np.sum(ll[idx])
 
-def dwhittle(ts, acffunc, params, delta = 1, h = None):
+def dwhittle(ts, acffunc, params, delta=1, h=None):
     
     tt = delta * np.arange(ts.size)
     ff, I = periodogram(ts, delta, h)
@@ -36,7 +39,7 @@ def dwhittle(ts, acffunc, params, delta = 1, h = None):
     # HACK: quick fix cause bochner isn't two sided yet
     return - 2 * np.sum(np.log(S_boch[ff_boch > 0]) + I[ff > 0]/S_boch[ff_boch > 0])
 
-def bochner(acf, delta = 1, bias = True, h = None):
+def bochner(acf, delta=1, bias=True, h=None, return_onesided=False):
 
     n = np.size(acf)
 
@@ -59,7 +62,10 @@ def bochner(acf, delta = 1, bias = True, h = None):
     
     psd = 2 * delta * np.real(np.fft.fft(acf))
 
-    return ff, ut.fftshift(psd)
+    if return_onesided:
+        return ff[ff>=0], ut.fftshift(psd)[ff>=0]
+    else:
+        return ff, ut.fftshift(psd)
 
 def inv_bochner(myfunc, params, n, delta = 1, alias = False, tol = 1e-6):
 
